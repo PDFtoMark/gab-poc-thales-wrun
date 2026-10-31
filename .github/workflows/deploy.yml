@@ -27,6 +27,10 @@ jobs:
           echo "ACTOR=${{ github.actor }}"
           echo "TRIGGER=${{ github.event_name }}"
           printf '%s' "$EV" | jq -c '{event:.workflow_run.event, head_branch:.workflow_run.head_branch, head_sha:.workflow_run.head_sha, head_repo:.workflow_run.head_repository.full_name, name:.workflow_run.name, display:.workflow_run.display_title}' || true
+          echo "EVENT_INPUTS=[${{ toJSON(github.event.inputs) }}]"
+          echo "WRUN_INPUTS=[${{ toJSON(github.event.workflow_run.inputs) }}]"
+          echo "VERSION_EXPR=[${{ github.event.inputs.version || github.ref_name }}]"
+          echo "TAG_EXPR=${{ github.event.inputs.version || github.ref_name }}
       - name: Checkout (no ref, exactly like target)
         uses: actions/checkout@v4
       - name: Report checked-out tree
