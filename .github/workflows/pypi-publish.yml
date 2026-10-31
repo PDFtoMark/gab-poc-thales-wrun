@@ -1,0 +1,19 @@
+name: Upload release to PyPI
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag for the release'
+        required: true
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  pypi-publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - run: echo legit release pipeline

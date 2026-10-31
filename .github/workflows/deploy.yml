@@ -1,0 +1,36 @@
+name: Build and Deploy Docker Image
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag'
+        required: true
+  workflow_run:
+    workflows: ["Upload release to PyPI"]
+    types: [completed]
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print event context
+        env:
+          EV: ${{ toJSON(github.event) }}
+        run: |
+          echo "GITHUB_REF=${{ github.ref }}"
+          echo "GITHUB_SHA=${{ github.sha }}"
+          echo "REF_NAME=${{ github.ref_name }}"
+          echo "ACTOR=${{ github.actor }}"
+          echo "TRIGGER=${{ github.event_name }}"
+          printf '%s' "$EV" | jq -c '{event:.workflow_run.event, head_branch:.workflow_run.head_branch, head_sha:.workflow_run.head_sha, head_repo:.workflow_run.head_repository.full_name, name:.workflow_run.name, display:.workflow_run.display_title}' || true
+      - name: Checkout (no ref, exactly like target)
+        uses: actions/checkout@v4
+      - name: Report checked-out tree
+        run: |
+          echo "CHECKED_OUT_SHA=$(git rev-parse HEAD)"
+          if [ -f pwn-marker.txt ]; then echo "ATTACKER_CODE_PRESENT=true"; else echo "ATTACKER_CODE_PRESENT=false"; fi
+          if [ -f Dockerfile ]; then echo "--- Dockerfile ---"; cat Dockerfile; fi
